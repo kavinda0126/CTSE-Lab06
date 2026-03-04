@@ -1,0 +1,82 @@
+{
+	"info": {
+		"_postman_id": "kafka-microservices-lab-6",
+		"name": "Kafka Microservices Lab 6",
+		"description": "Event-Driven Architecture with Kafka (KRaft Mode) - CTSE Lab 6",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Order (via API Gateway)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": \"ORD-1001\",\n  \"item\": \"Laptop\",\n  \"quantity\": 1\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/orders",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["orders"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order - Phone",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": \"ORD-1002\",\n  \"item\": \"Phone\",\n  \"quantity\": 2\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/orders",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["orders"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order - Direct to Order Service",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": \"ORD-1003\",\n  \"item\": \"Tablet\",\n  \"quantity\": 3\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/orders",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["orders"]
+				}
+			},
+			"response": []
+		}
+	]
+}
