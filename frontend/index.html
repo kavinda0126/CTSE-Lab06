@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CTSE Microservices Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #16213e 100%);
+      border-bottom: 1px solid #2d3748;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0078d4, #00bcf2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .logo-text h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .logo-text p {
+      font-size: 0.75rem;
+      color: #718096;
+    }
+
+    .header-badge {
+      background: #0078d4;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Main Layout ── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* ── Section Title ── */
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #718096;
+      margin-bottom: 16px;
+    }
+
+    /* ── Status Cards ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .card:hover {
+      border-color: #0078d4;
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .card-icon {
+      font-size: 1.4rem;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #4a5568;
+    }
+
+    .status-dot.online  { background: #48bb78; box-shadow: 0 0 8px #48bb7880; }
+    .status-dot.offline { background: #fc8181; box-shadow: 0 0 8px #fc818180; }
+    .status-dot.checking { background: #f6e05e; animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+    }
+
+    .card p {
+      font-size: 0.75rem;
+      color: #718096;
+    }
+
+    .card .status-text {
+      margin-top: 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #718096;
+    }
+
+    .status-text.online  { color: #48bb78; }
+    .status-text.offline { color: #fc8181; }
+    .status-text.checking { color: #f6e05e; }
+
+    /* ── API Tester ── */
+    .panel {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .panel h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #e2e8f0;
+    }
+
+    .panel .subtitle {
+      font-size: 0.78rem;
+      color: #718096;
+      margin-bottom: 20px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    select, input[type="text"] {
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      color: #e2e8f0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: #0078d4;
+    }
+
+    select { min-width: 140px; }
+
+    input[type="text"] { flex: 1; min-width: 200px; }
+
+    .btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:hover   { opacity: 0.85; }
+    .btn:active  { transform: scale(0.97); }
+
+    .btn-primary { background: #0078d4; color: #fff; }
+    .btn-secondary { background: #2d3748; color: #e2e8f0; }
+
+    .response-box {
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      color: #a0aec0;
+      min-height: 80px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .response-box .http-status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 0.72rem;
+    }
+
+    .http-2xx { background: #276749; color: #9ae6b4; }
+    .http-4xx { background: #742a2a; color: #feb2b2; }
+    .http-err { background: #744210; color: #fbd38d; }
+
+    /* ── Endpoints Reference ── */
+    .endpoints-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 12px;
+    }
+
+    .endpoint-item {
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .method-badge {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .GET    { background: #1a3a5c; color: #63b3ed; }
+    .POST   { background: #1a4731; color: #68d391; }
+    .DELETE { background: #4a1a1a; color: #fc8181; }
+
+    .endpoint-path {
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      color: #a0aec0;
+      flex: 1;
+    }
+
+    .endpoint-desc {
+      font-size: 0.7rem;
+      color: #4a5568;
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid #2d3748;
+      color: #718096;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover { border-color: #0078d4; color: #0078d4; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 30px;
+      border-top: 1px solid #2d3748;
+      font-size: 0.75rem;
+      color: #4a5568;
+      margin-top: 20px;
+    }
+
+    /* ── Config Banner ── */
+    .config-banner {
+      background: linear-gradient(135deg, #1a3a5c20, #0078d420);
+      border: 1px solid #0078d440;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.82rem;
+    }
+
+    .config-banner .icon { font-size: 1.2rem; }
+
+    .config-banner span { color: #90cdf4; }
+
+    #gatewayUrlDisplay {
+      font-family: 'Courier New', monospace;
+      color: #63b3ed;
+      background: #0f1117;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+    }
+
+    .edit-url-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid #2d3748;
+      color: #718096;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    .edit-url-btn:hover { border-color: #0078d4; color: #0078d4; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">☁</div>
+    <div class="logo-text">
+      <h1>Microservices Dashboard</h1>
+      <p>CTSE Lab 7 · Azure Deployment</p>
+    </div>
+  </div>
+  <div class="header-badge">Azure Container Apps</div>
+</header>
+
+<main>
+
+  <!-- Config Banner -->
+  <div class="config-banner">
+    <span class="icon">🔗</span>
+    <span>Gateway URL: <span id="gatewayUrlDisplay">not configured</span></span>
+    <button class="edit-url-btn" onclick="promptGatewayUrl()">Change URL</button>
+  </div>
+
+  <!-- Service Status -->
+  <p class="section-title">Service Health</p>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🛡️</span>
+        <span class="status-dot checking" id="dot-gateway"></span>
+      </div>
+      <h3>API Gateway</h3>
+      <p>Port 8080 · Spring Cloud Gateway</p>
+      <p class="status-text checking" id="label-gateway">Checking…</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📦</span>
+        <span class="status-dot checking" id="dot-orders"></span>
+      </div>
+      <h3>Order Service</h3>
+      <p>Route: /orders/**</p>
+      <p class="status-text checking" id="label-orders">Checking…</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🗃️</span>
+        <span class="status-dot checking" id="dot-inventory"></span>
+      </div>
+      <h3>Inventory Service</h3>
+      <p>Route: /inventory/**</p>
+      <p class="status-text checking" id="label-inventory">Checking…</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">💳</span>
+        <span class="status-dot checking" id="dot-billing"></span>
+      </div>
+      <h3>Billing Service</h3>
+      <p>Route: /billing/**</p>
+      <p class="status-text checking" id="label-billing">Checking…</p>
+    </div>
+  </div>
+
+  <!-- API Tester -->
+  <div class="panel">
+    <h2>API Request Tester</h2>
+    <p class="subtitle">Send requests through the gateway to any microservice</p>
+
+    <div class="input-row">
+      <select id="method">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="DELETE">DELETE</option>
+      </select>
+      <input type="text" id="endpoint" placeholder="/orders  or  /inventory  or  /billing" value="/orders" />
+      <button class="btn btn-primary" onclick="sendRequest()">Send ▶</button>
+      <button class="btn btn-secondary" onclick="clearResponse()">Clear</button>
+    </div>
+
+    <div id="responseArea" class="response-box">Response will appear here…</div>
+  </div>
+
+  <!-- Endpoints Reference -->
+  <p class="section-title">Available Endpoints</p>
+  <div class="panel">
+    <div class="endpoints-grid" id="endpointsList">
+      <!-- injected by JS -->
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  CTSE Lab 7 · Azure Microservices Deployment &nbsp;·&nbsp; Hosted on Azure Static Web Apps
+</footer>
+
+<script>
+  // ── Configuration ──────────────────────────────────────────
+  const STORAGE_KEY = 'ctse_gateway_url';
+
+  function getGatewayUrl() {
+    return localStorage.getItem(STORAGE_KEY) || '';
+  }
+
+  function setGatewayUrl(url) {
+    const clean = url.replace(/\/$/, '');
+    localStorage.setItem(STORAGE_KEY, clean);
+    document.getElementById('gatewayUrlDisplay').textContent = clean || 'not configured';
+    checkAllServices();
+  }
+
+  function promptGatewayUrl() {
+    const current = getGatewayUrl();
+    const input = prompt('Enter your Azure Container App gateway URL:\n(e.g. https://gateway.xxx.eastus.azurecontainerapps.io)', current);
+    if (input !== null) setGatewayUrl(input.trim());
+  }
+
+  // ── Health Checks ──────────────────────────────────────────
+  const services = [
+    { id: 'gateway',   path: '/actuator/health',   label: 'API Gateway' },
+    { id: 'orders',    path: '/orders/actuator/health',    label: 'Order Service' },
+    { id: 'inventory', path: '/inventory/actuator/health', label: 'Inventory Service' },
+    { id: 'billing',   path: '/billing/actuator/health',   label: 'Billing Service' },
+  ];
+
+  async function checkService(svc) {
+    const base = getGatewayUrl();
+    const dot   = document.getElementById('dot-' + svc.id);
+    const label = document.getElementById('label-' + svc.id);
+
+    if (!base) {
+      dot.className   = 'status-dot';
+      label.className = 'status-text';
+      label.textContent = 'URL not set';
+      return;
+    }
+
+    dot.className   = 'status-dot checking';
+    label.className = 'status-text checking';
+    label.textContent = 'Checking…';
+
+    try {
+      const res = await fetch(base + svc.path, { signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        dot.className   = 'status-dot online';
+        label.className = 'status-text online';
+        label.textContent = '● Online';
+      } else {
+        dot.className   = 'status-dot offline';
+        label.className = 'status-text offline';
+        label.textContent = `✕ HTTP ${res.status}`;
+      }
+    } catch {
+      dot.className   = 'status-dot offline';
+      label.className = 'status-text offline';
+      label.textContent = '✕ Unreachable';
+    }
+  }
+
+  function checkAllServices() {
+    services.forEach(checkService);
+  }
+
+  // ── API Tester ─────────────────────────────────────────────
+  async function sendRequest() {
+    const base     = getGatewayUrl();
+    const method   = document.getElementById('method').value;
+    const endpoint = document.getElementById('endpoint').value.trim();
+    const box      = document.getElementById('responseArea');
+
+    if (!base) {
+      box.textContent = '⚠  Please configure the Gateway URL first (click "Change URL" above).';
+      return;
+    }
+
+    const url = base + (endpoint.startsWith('/') ? endpoint : '/' + endpoint);
+    box.textContent = `${method} ${url}\n\nSending…`;
+
+    try {
+      const start = Date.now();
+      const res   = await fetch(url, { method, signal: AbortSignal.timeout(10000) });
+      const ms    = Date.now() - start;
+      let body    = '';
+      try { body = JSON.stringify(await res.json(), null, 2); }
+      catch { body = await res.text(); }
+
+      const cls = res.status < 300 ? 'http-2xx' : 'http-4xx';
+      box.innerHTML =
+        `<span class="http-status ${cls}">HTTP ${res.status}</span>  ${ms}ms\n\n` +
+        escapeHtml(body);
+    } catch (err) {
+      box.innerHTML =
+        `<span class="http-status http-err">ERROR</span>\n\n${escapeHtml(String(err))}`;
+    }
+  }
+
+  function clearResponse() {
+    document.getElementById('responseArea').textContent = 'Response will appear here…';
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Endpoints Reference ────────────────────────────────────
+  const ENDPOINTS = [
+    { method:'GET',    path:'/orders',         desc:'List all orders' },
+    { method:'POST',   path:'/orders',         desc:'Create new order' },
+    { method:'GET',    path:'/orders/{id}',    desc:'Get order by ID' },
+    { method:'DELETE', path:'/orders/{id}',    desc:'Delete order' },
+    { method:'GET',    path:'/inventory',      desc:'List inventory items' },
+    { method:'POST',   path:'/inventory',      desc:'Add inventory item' },
+    { method:'GET',    path:'/inventory/{id}', desc:'Get item by ID' },
+    { method:'GET',    path:'/billing',        desc:'List billing records' },
+    { method:'POST',   path:'/billing',        desc:'Create billing record' },
+    { method:'GET',    path:'/actuator/health',desc:'Gateway health check' },
+  ];
+
+  function renderEndpoints() {
+    const el = document.getElementById('endpointsList');
+    el.innerHTML = ENDPOINTS.map(e => `
+      <div class="endpoint-item">
+        <span class="method-badge ${e.method}">${e.method}</span>
+        <span class="endpoint-path">${e.path}</span>
+        <span class="endpoint-desc">${e.desc}</span>
+        <button class="copy-btn" onclick="copyEndpoint('${e.path}')">Copy</button>
+      </div>
+    `).join('');
+  }
+
+  function copyEndpoint(path) {
+    const base = getGatewayUrl();
+    navigator.clipboard.writeText(base + path).catch(() => {});
+  }
+
+  // ── Init ───────────────────────────────────────────────────
+  document.getElementById('gatewayUrlDisplay').textContent = getGatewayUrl() || 'not configured';
+  renderEndpoints();
+  checkAllServices();
+
+  // Re-check health every 30 seconds
+  setInterval(checkAllServices, 30000);
+</script>
+</body>
+</html>
