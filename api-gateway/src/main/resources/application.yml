@@ -6,16 +6,42 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: false
       routes:
         - id: order-service
-          uri: http://localhost:8081
+          uri: ${ORDER_SERVICE_URL:http://localhost:8081}
           predicates:
             - Path=/orders/**
+          filters:
+            - StripPrefix=1
         - id: inventory-service
-          uri: http://localhost:8082
+          uri: ${INVENTORY_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/inventory/**
+          filters:
+            - StripPrefix=1
         - id: billing-service
-          uri: http://localhost:8083
+          uri: ${BILLING_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/billing/**
+          filters:
+            - StripPrefix=1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      cors:
+        allowed-origins: "*"
+        allowed-methods: "*"
+        allowed-headers: "*"
+  endpoint:
+    health:
+      show-details: always
